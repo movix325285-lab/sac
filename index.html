@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MovieHub – Supabase Realtime</title>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d0d0d;
+      color: #fff;
+      min-height: 100vh;
+    }
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px 30px; background: #1a1a1a; border-bottom: 3px solid #e50914;
+      flex-wrap: wrap; gap: 10px;
+    }
+    nav h1 { font-size: 1.8rem; color: #e50914; letter-spacing: 1px; }
+    .nav-buttons button {
+      padding: 10px 24px; margin-left: 12px;
+      border: none; border-radius: 30px; font-size: 16px;
+      font-weight: 600; cursor: pointer; transition: 0.3s;
+    }
+    .btn-movies { background: #e50914; color: white; }
+    .btn-movies:hover { background: #ff0a16; }
+    .btn-login { background: transparent; border: 2px solid #e50914; color: #e50914; }
+    .btn-login:hover { background: #e50914; color: white; }
+
+    .category-filter {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin: 20px 0; padding: 0 20px; justify-content: center;
+    }
+    .category-btn {
+      padding: 8px 20px; border-radius: 25px;
+      background: #2c2c2c; color: #ddd;
+      border: 1px solid #444; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: 0.2s;
+    }
+    .category-btn:hover { background: #3a3a3a; }
+    .category-btn.active { background: #e50914; color: white; border-color: #e50914; }
+
+    .container { max-width: 1300px; margin: auto; padding: 15px 20px 30px; }
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px;
+    }
+    .movie-card {
+      background: #1e1e1e; border-radius: 12px; overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .movie-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(229,9,20,0.4); }
+    .movie-poster { width: 100%; height: 350px; object-fit: cover; }
+    .movie-info { padding: 15px; }
+    .movie-info h3 { margin-bottom: 6px; color: #e50914; }
+    .movie-info p { font-size: 14px; color: #ccc; margin-bottom: 10px; }
+    .categories { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+    .category-tag {
+      background: #e50914; color: white; padding: 3px 12px;
+      border-radius: 12px; font-size: 12px; font-weight: 500;
+    }
+    .extra-images { display: flex; gap: 10px; margin: 8px 0; }
+    .extra-images img {
+      width: 70px; height: 70px; object-fit: cover; border-radius: 8px;
+      border: 1px solid #444;
+    }
+    .watch-link {
+      display: inline-block; background: #e50914; color: white;
+      padding: 8px 20px; border-radius: 20px; text-decoration: none;
+      font-weight: 600; margin-top: 8px; transition: 0.3s;
+    }
+    .watch-link:hover { background: #b00610; }
+
+    .admin-actions { margin-top: 12px; display: flex; gap: 8px; }
+    .btn-edit, .btn-delete {
+      padding: 6px 14px; border-radius: 15px;
+      border: none; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: 0.2s;
+    }
+    .btn-edit { background: #ffa500; color: #000; }
+    .btn-edit:hover { background: #ff8c00; }
+    .btn-delete { background: #dc3545; color: white; }
+    .btn-delete:hover { background: #bb2d3b; }
+
+    .overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); justify-content: center; align-items: center;
+      z-index: 100;
+    }
+    .overlay.active { display: flex; }
+    .panel {
+      background: #1e1e1e; padding: 30px; border-radius: 14px;
+      width: 90%; max-width: 600px; box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .panel h2 { margin-bottom: 20px; color: #e50914; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #ddd; }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 12px; background: #2c2c2c; border: 1px solid #555;
+      border-radius: 6px; color: white; font-size: 15px;
+    }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; }
+    .checkbox-item { display: flex; align-items: center; gap: 6px; }
+    .checkbox-item input[type="checkbox"] { accent-color: #e50914; width: 16px; height: 16px; }
+    .error { color: #ff4d4d; font-size: 14px; margin-top: 8px; display: none; }
+    .btn-submit {
+      background: #e50914; color: white; width: 100%; padding: 12px;
+      border: none; border-radius: 30px; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: 0.3s; margin-top: 8px;
+    }
+    .btn-submit:hover { background: #ff0a16; }
+    .btn-close { background: #444; color: white; margin-top: 15px; }
+    .current-poster { margin-bottom: 10px; }
+    .current-poster img { max-width: 150px; max-height: 150px; border-radius: 8px; display: block; }
+    .note { color: #888; font-size: 13px; margin-top: 4px; }
+    .hidden { display: none !important; }
+    .export-import { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-export { background: #2c7; }
+    .btn-import { background: #37c; }
+  </style>
+</head>
+<body>
+  <nav>
+    <h1>🎬 MovieHub</h1>
+    <div class="nav-buttons">
+      <button id="showMoviesBtn" class="btn-movies">All Movies</button>
+      <button id="loginBtn" class="btn-login">Admin Login</button>
+    </div>
+  </nav>
+
+  <div class="category-filter" id="categoryFilter"></div>
+
+  <div class="container">
+    <div id="movieGrid" class="movie-grid"></div>
+    <p id="noMovies" style="display:none; text-align:center; margin-top:60px; color:#aaa;">
+      No movies found for this category.
+    </p>
+  </div>
+
+  <!-- Login Overlay -->
+  <div id="loginOverlay" class="overlay">
+    <div class="panel">
+      <h2>🔐 Admin Login</h2>
+      <div class="form-group"><label>Username</label><input type="text" id="loginUsername" placeholder="admin"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+      <button id="doLoginBtn" class="btn-submit">Login</button>
+      <p id="loginError" class="error"></p>
+      <button id="closeLoginBtn" class="btn-close btn-submit" style="background:#444;">Close</button>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="adminPanel" class="overlay">
+    <div class="panel" style="max-width:600px;">
+      <h2>📤 Upload New Movie</h2>
+      <div class="form-group"><label>Movie Title *</label><input type="text" id="movieTitle"></div>
+      <div class="form-group"><label>Description</label><textarea id="movieDesc"></textarea></div>
+      <div class="form-group"><label>Poster Image</label><input type="file" id="moviePoster" accept="image/*"></div>
+      <div class="form-group"><label>Thumbnail URL</label><input type="url" id="thumbnailUrl" placeholder="https://..."></div>
+      <div class="form-group"><label>Screenshot URL</label><input type="url" id="screenshotUrl" placeholder="https://..."></div>
+      <div class="form-group"><label>Watching Link *</label><input type="url" id="watchLink" placeholder="https://..."></div>
+      <div class="form-group">
+        <label>Categories *</label>
+        <div class="checkbox-group" id="categoryCheckboxes"></div>
+      </div>
+      <button id="uploadMovieBtn" class="btn-submit">Upload Movie</button>
+      <p id="uploadMessage" class="error"></p>
+
+      <div class="export-import">
+        <button id="exportBtn" class="btn-submit btn-export">⬇ Export Movies (JSON)</button>
+        <button id="importBtn" class="btn-submit btn-import">⬆ Import Movies (JSON)</button>
+      </div>
+      <input type="file" id="importFile" accept=".json" class="hidden">
+
+      <button id="logoutBtn" class="btn-close btn-submit" style="background:#555;">Logout</button>
+      <button id="closeAdminBtn" class="btn-close btn-submit" style="background:#444;">Close</button>
+    </div>
+  </div>
+
+  <!-- Edit Panel -->
+  <div id="editPanel" class="overlay">
+    <div class="panel" style="max-width:600px;">
+      <h2>✏️ Edit Movie</h2>
+      <input type="hidden" id="editMovieId">
+      <div class="form-group"><label>Movie Title *</label><input type="text" id="editMovieTitle"></div>
+      <div class="form-group"><label>Description</label><textarea id="editMovieDesc"></textarea></div>
+      <div class="form-group">
+        <label>Poster Image</label>
+        <div class="current-poster" id="editPosterPreview"></div>
+        <input type="file" id="editMoviePoster" accept="image/*">
+        <p class="note">Leave empty to keep current poster.</p>
+      </div>
+      <div class="form-group"><label>Thumbnail URL</label><input type="url" id="editThumbnailUrl"></div>
+      <div class="form-group"><label>Screenshot URL</label><input type="url" id="editScreenshotUrl"></div>
+      <div class="form-group"><label>Watching Link *</label><input type="url" id="editWatchLink"></div>
+      <div class="form-group">
+        <label>Categories *</label>
+        <div class="checkbox-group" id="editCategoryCheckboxes"></div>
+      </div>
+      <button id="saveEditBtn" class="btn-submit">Save Changes</button>
+      <p id="editMessage" class="error"></p>
+      <button id="cancelEditBtn" class="btn-close btn-submit" style="background:#444;">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    (async () => {
+      // ============== SUPABASE CONFIG ==============
+      // 👇 Apni project ki values yahan daalein
+      const SUPABASE_URL = 'https://uvcvrjuvqgkvtitrpqjp.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_2eG8zK6oP5xQhm4aR122Ww_JEN3h8Fh';
+
+      const { createClient } = supabase;
+      const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // ============== APP STATE ==============
+      const CATEGORIES = [
+        "Comedy", "Korean", "Hollywood", "Romantic", "Documentary",
+        "Hotstar", "Action", "South", "Bhojpuri", "Korean Drama",
+        "Bollywood", "Anime", "Web Series", "Horror"
+      ];
+      const ADMIN_CRED = { user: 'admin', pass: 'admin123' };
+      let adminLoggedIn = false;
+      let currentFilter = 'All';
+      let allMovies = []; // local cache
+
+      // ============== DOM REFS ==============
+      const loginBtn = document.getElementById('loginBtn');
+      const loginOverlay = document.getElementById('loginOverlay');
+      const adminPanel = document.getElementById('adminPanel');
+      const editPanel = document.getElementById('editPanel');
+      const movieGrid = document.getElementById('movieGrid');
+      const noMovies = document.getElementById('noMovies');
+      const categoryFilter = document.getElementById('categoryFilter');
+
+      // ============== HELPER FUNCTIONS ==============
+      const getMovies = async () => {
+        const { data, error } = await supabaseClient
+          .from('movies')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        // Parse categories if stored as jsonb (Supabase returns it as JSON)
+        return data.map(m => ({
+          ...m,
+          categories: Array.isArray(m.categories) ? m.categories : JSON.parse(m.categories || '[]')
+        }));
+      };
+
+      const addMovieToDB = async (movie) => {
+        const { data, error } = await supabaseClient
+          .from('movies')
+          .insert([{
+            title: movie.title,
+            description: movie.description,
+            poster_url: movie.posterUrl,
+            thumbnail_url: movie.thumbnailUrl,
+            screenshot_url: movie.screenshotUrl,
+            watch_link: movie.watchLink,
+            categories: movie.categories || []
+          }])
+          .select();
+        if (error) throw error;
+        return data[0];
+      };
+
+      const updateMovieInDB = async (id, updates) => {
+        const payload = {};
+        if (updates.title !== undefined) payload.title = updates.title;
+        if (updates.description !== undefined) payload.description = updates.description;
+        if (updates.posterUrl !== undefined) payload.poster_url = updates.posterUrl;
+        if (updates.thumbnailUrl !== undefined) payload.thumbnail_url = updates.thumbnailUrl;
+        if (updates.screenshotUrl !== undefined) payload.screenshot_url = updates.screenshotUrl;
+        if (updates.watchLink !== undefined) payload.watch_link = updates.watchLink;
+        if (updates.categories !== undefined) payload.categories = updates.categories;
+
+        const { error } = await supabaseClient
+          .from('movies')
+          .update(payload)
+          .eq('id', id);
+        if (error) throw error;
+      };
+
+      const deleteMovieFromDB = async (id) => {
+        const { error } = await supabaseClient
+          .from('movies')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+      };
+
+      // ============== UI FUNCTIONS ==============
+      const updateLoginButton = () => {
+        loginBtn.textContent = adminLoggedIn ? 'Admin Panel' : 'Admin Login';
+        loginBtn.className = adminLoggedIn ? 'btn-movies' : 'btn-login';
+      };
+
+      const buildCategoryFilters = () => {
+        categoryFilter.innerHTML = '';
+        const allBtn = document.createElement('button');
+        allBtn.className = 'category-btn' + (currentFilter === 'All' ? ' active' : '');
+        allBtn.textContent = 'All';
+        allBtn.addEventListener('click', () => {
+          currentFilter = 'All';
+          renderMovies();
+          buildCategoryFilters();
+        });
+        categoryFilter.appendChild(allBtn);
+
+        CATEGORIES.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.className = 'category-btn' + (currentFilter === cat ? ' active' : '');
+          btn.textContent = cat;
+          btn.addEventListener('click', () => {
+            currentFilter = cat;
+            renderMovies();
+            buildCategoryFilters();
+          });
+          categoryFilter.appendChild(btn);
+        });
+      };
+
+      const buildCheckboxes = (containerId, selected = []) => {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        CATEGORIES.forEach(cat => {
+          const div = document.createElement('div');
+          div.className = 'checkbox-item';
+          const checked = selected.includes(cat) ? 'checked' : '';
+          div.innerHTML = `<input type="checkbox" value="${cat}" ${checked}> <label>${cat}</label>`;
+          container.appendChild(div);
+        });
+      };
+
+      const clearUploadForm = () => {
+        document.getElementById('movieTitle').value = '';
+        document.getElementById('movieDesc').value = '';
+        document.getElementById('moviePoster').value = '';
+        document.getElementById('thumbnailUrl').value = '';
+        document.getElementById('screenshotUrl').value = '';
+        document.getElementById('watchLink').value = '';
+        document.getElementById('uploadMessage').style.display = 'none';
+        buildCheckboxes('categoryCheckboxes');
+      };
+
+      const renderMovies = () => {
+        const filtered = currentFilter === 'All'
+          ? allMovies
+          : allMovies.filter(m => m.categories?.includes(currentFilter));
+        movieGrid.innerHTML = '';
+        if (filtered.length === 0) {
+          noMovies.style.display = 'block';
+          return;
+        }
+        noMovies.style.display = 'none';
+
+        filtered.forEach(movie => {
+          const card = document.createElement('div');
+          card.className = 'movie-card';
+          const catTags = (movie.categories || []).map(c => `<span class="category-tag">${c}</span>`).join('');
+          let extra = '';
+          if (movie.thumbnail_url) extra += `<div class="extra-images"><img src="${movie.thumbnail_url}" alt="thumb"></div>`;
+          if (movie.screenshot_url) extra += `<div class="extra-images"><img src="${movie.screenshot_url}" alt="screenshot"></div>`;
+          const adminBtns = adminLoggedIn ? `
+            <div class="admin-actions">
+              <button class="btn-edit" data-id="${movie.id}">✏️ Edit</button>
+              <button class="btn-delete" data-id="${movie.id}">🗑️ Delete</button>
+            </div>` : '';
+
+          card.innerHTML = `
+            <img class="movie-poster" src="${movie.poster_url || 'https://via.placeholder.com/280x350?text=No+Poster'}" alt="${movie.title}">
+            <div class="movie-info">
+              <h3>${movie.title}</h3>
+              <p>${movie.description || 'No description.'}</p>
+              <div class="categories">${catTags}</div>
+              ${extra}
+              ${movie.watch_link ? `<a href="${movie.watch_link}" target="_blank" class="watch-link">▶ Watch Now</a>` : ''}
+              ${adminBtns}
+            </div>`;
+          if (adminLoggedIn) {
+            card.querySelector('.btn-edit')?.addEventListener('click', () => openEdit(movie));
+            card.querySelector('.btn-delete')?.addEventListener('click', () => {
+              if (confirm(`Delete "${movie.title}"?`)) {
+                deleteMovieFromDB(movie.id).catch(err => alert('Delete failed: ' + err.message));
+              }
+            });
+          }
+          movieGrid.appendChild(card);
+        });
+      };
+
+      // Refresh all movies from DB and re-render
+      const loadMovies = async () => {
+        try {
+          allMovies = await getMovies();
+          renderMovies();
+        } catch (err) {
+          console.error('Failed to load movies:', err);
+          alert('Failed to load movies. Check console.');
+        }
+      };
+
+      // ============== EDIT ==============
+      const openEdit = (movie) => {
+        document.getElementById('editMovieId').value = movie.id;
+        document.getElementById('editMovieTitle').value = movie.title || '';
+        document.getElementById('editMovieDesc').value = movie.description || '';
+        document.getElementById('editThumbnailUrl').value = movie.thumbnail_url || '';
+        document.getElementById('editScreenshotUrl').value = movie.screenshot_url || '';
+        document.getElementById('editWatchLink').value = movie.watch_link || '';
+        document.getElementById('editPosterPreview').innerHTML = movie.poster_url
+          ? `<img src="${movie.poster_url}" style="max-width:150px;max-height:150px;"><p class="note">Current poster</p>`
+          : '<p class="note">No poster</p>';
+        document.getElementById('editMoviePoster').value = '';
+        buildCheckboxes('editCategoryCheckboxes', movie.categories || []);
+        document.getElementById('editMessage').style.display = 'none';
+        editPanel.classList.add('active');
+      };
+
+      document.getElementById('saveEditBtn').addEventListener('click', async () => {
+        const id = document.getElementById('editMovieId').value;
+        const title = document.getElementById('editMovieTitle').value.trim();
+        const desc = document.getElementById('editMovieDesc').value.trim();
+        const thumb = document.getElementById('editThumbnailUrl').value.trim();
+        const screen = document.getElementById('editScreenshotUrl').value.trim();
+        const watch = document.getElementById('editWatchLink').value.trim();
+        const file = document.getElementById('editMoviePoster').files[0];
+        const cats = Array.from(document.querySelectorAll('#editCategoryCheckboxes input:checked')).map(cb => cb.value);
+        const msg = document.getElementById('editMessage');
+
+        if (!title) { msg.textContent = 'Title required.'; msg.style.display='block'; return; }
+        if (!watch) { msg.textContent = 'Watch link required.'; msg.style.display='block'; return; }
+        if (cats.length === 0) { msg.textContent = 'Select at least one category.'; msg.style.display='block'; return; }
+
+        const applyUpdate = async (posterBase64 = null) => {
+          try {
+            const updateData = {
+              title,
+              description: desc,
+              thumbnailUrl: thumb,
+              screenshotUrl: screen,
+              watchLink: watch,
+              categories: cats
+            };
+            // Only set posterUrl if new file uploaded, else keep current
+            if (file && posterBase64) {
+              updateData.posterUrl = posterBase64;
+            }
+            await updateMovieInDB(id, updateData);
+            editPanel.classList.remove('active');
+            // Realtime subscription will automatically reload the list
+          } catch (err) {
+            msg.textContent = 'Update failed: ' + err.message;
+            msg.style.display = 'block';
+          }
+        };
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = e => applyUpdate(e.target.result);
+          reader.readAsDataURL(file);
+        } else {
+          applyUpdate();
+        }
+      });
+
+      document.getElementById('cancelEditBtn').addEventListener('click', () => {
+        editPanel.classList.remove('active');
+      });
+
+      // ============== UPLOAD ==============
+      document.getElementById('uploadMovieBtn').addEventListener('click', async () => {
+        const title = document.getElementById('movieTitle').value.trim();
+        const desc = document.getElementById('movieDesc').value.trim();
+        const thumb = document.getElementById('thumbnailUrl').value.trim();
+        const screen = document.getElementById('screenshotUrl').value.trim();
+        const watch = document.getElementById('watchLink').value.trim();
+        const file = document.getElementById('moviePoster').files[0];
+        const cats = Array.from(document.querySelectorAll('#categoryCheckboxes input:checked')).map(cb => cb.value);
+        const msg = document.getElementById('uploadMessage');
+
+        if (!title) { msg.textContent = 'Title required.'; msg.style.display='block'; return; }
+        if (!watch) { msg.textContent = 'Watch link required.'; msg.style.display='block'; return; }
+        if (cats.length === 0) { msg.textContent = 'Select at least one category.'; msg.style.display='block'; return; }
+
+        const save = async (posterBase64) => {
+          try {
+            await addMovieToDB({
+              title,
+              description: desc,
+              posterUrl: posterBase64 || '',
+              thumbnailUrl: thumb,
+              screenshotUrl: screen,
+              watchLink: watch,
+              categories: cats
+            });
+            msg.textContent = '✅ Movie uploaded!';
+            msg.style.color = '#4caf50';
+            msg.style.display = 'block';
+            clearUploadForm();
+            // Realtime will handle UI refresh
+          } catch (err) {
+            msg.textContent = 'Upload failed: ' + err.message;
+            msg.style.display = 'block';
+          }
+        };
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = e => save(e.target.result);
+          reader.readAsDataURL(file);
+        } else {
+          save('');
+        }
+      });
+
+      // ============== EXPORT / IMPORT ==============
+      document.getElementById('exportBtn').addEventListener('click', async () => {
+        const movies = await getMovies();
+        const blob = new Blob([JSON.stringify(movies, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'movies_backup.json';
+        a.click();
+      });
+
+      document.getElementById('importBtn').addEventListener('click', () => {
+        document.getElementById('importFile').click();
+      });
+
+      document.getElementById('importFile').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (!Array.isArray(imported)) throw new Error('Invalid format');
+            for (const movie of imported) {
+              const { id, created_at, ...rest } = movie;
+              await supabaseClient.from('movies').insert([{
+                title: rest.title,
+                description: rest.description,
+                poster_url: rest.poster_url,
+                thumbnail_url: rest.thumbnail_url,
+                screenshot_url: rest.screenshot_url,
+                watch_link: rest.watch_link,
+                categories: rest.categories || []
+              }]);
+            }
+            alert('✅ Movies imported successfully!');
+          } catch (err) {
+            alert('❌ Import error: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      // ============== AUTH ==============
+      loginBtn.addEventListener('click', () => {
+        if (adminLoggedIn) {
+          adminPanel.classList.add('active');
+          buildCheckboxes('categoryCheckboxes');
+        } else {
+          loginOverlay.classList.add('active');
+        }
+      });
+
+      document.getElementById('closeLoginBtn').addEventListener('click', () => {
+        loginOverlay.classList.remove('active');
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+      });
+
+      document.getElementById('doLoginBtn').addEventListener('click', () => {
+        const u = document.getElementById('loginUsername').value.trim();
+        const p = document.getElementById('loginPassword').value;
+        if (u === ADMIN_CRED.user && p === ADMIN_CRED.pass) {
+          adminLoggedIn = true;
+          updateLoginButton();
+          loginOverlay.classList.remove('active');
+          adminPanel.classList.add('active');
+          buildCheckboxes('categoryCheckboxes');
+          renderMovies();
+        } else {
+          document.getElementById('loginError').textContent = 'Invalid credentials';
+          document.getElementById('loginError').style.display = 'block';
+        }
+      });
+
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        adminLoggedIn = false;
+        updateLoginButton();
+        adminPanel.classList.remove('active');
+        editPanel.classList.remove('active');
+        clearUploadForm();
+        renderMovies();
+      });
+
+      document.getElementById('closeAdminBtn').addEventListener('click', () => {
+        adminPanel.classList.remove('active');
+        clearUploadForm();
+      });
+
+      // Close overlays on outside click
+      window.addEventListener('click', e => {
+        if (e.target === loginOverlay) loginOverlay.classList.remove('active');
+        if (e.target === adminPanel) adminPanel.classList.remove('active');
+        if (e.target === editPanel) editPanel.classList.remove('active');
+      });
+
+      document.getElementById('showMoviesBtn').addEventListener('click', () => {
+        currentFilter = 'All';
+        renderMovies();
+        buildCategoryFilters();
+      });
+
+      // ============== REALTIME SUBSCRIPTION ==============
+      supabaseClient
+        .channel('movies-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'movies' }, payload => {
+          console.log('Realtime change received:', payload.eventType);
+          loadMovies(); // Refresh the list
+        })
+        .subscribe();
+
+      // ============== INITIAL SETUP ==============
+      // Restore admin session from localStorage (simple check)
+      adminLoggedIn = localStorage.getItem('moviehub_admin') === '1';
+      updateLoginButton();
+      buildCategoryFilters();
+      buildCheckboxes('categoryCheckboxes');
+      buildCheckboxes('editCategoryCheckboxes');
+      try {
+        await loadMovies();
+      } catch (err) {
+        console.error('Initial load failed:', err);
+        // If error due to RLS, still show empty grid
+      }
+
+      // Save admin state
+      window.addEventListener('beforeunload', () => {
+        localStorage.setItem('moviehub_admin', adminLoggedIn ? '1' : '0');
+      });
+    })();
+  </script>
+</body>
+</html>
