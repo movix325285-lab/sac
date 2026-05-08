@@ -20,6 +20,76 @@
       flex-wrap: wrap; gap: 10px;
     }
     nav h1 { font-size: 1.8rem; color: #e50914; letter-spacing: 1px; }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: #2c2c2c;
+      border-radius: 30px;
+      padding: 5px 15px;
+      border: 1px solid #444;
+      margin: 0 15px;
+      flex: 1;
+      max-width: 350px;
+      min-width: 200px;
+    }
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 15px;
+      width: 100%;
+      padding: 8px 5px;
+    }
+    .search-box input::placeholder {
+      color: #888;
+    }
+    .search-icon {
+      color: #e50914;
+      font-size: 18px;
+      margin-right: 8px;
+    }
+
+    .social-request {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .request-label {
+      color: #ccc;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .social-icons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .social-link {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, opacity 0.2s;
+      text-decoration: none;
+    }
+    .social-link:hover {
+      transform: scale(1.1);
+      opacity: 0.9;
+    }
+    .social-link svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+    .social-link.fb { background: #1877F2; }
+    .social-link.ig { background: #E4405F; }
+    .social-link.tg { background: #0088cc; }
+
     .nav-buttons button {
       padding: 10px 24px; margin-left: 12px;
       border: none; border-radius: 30px; font-size: 16px;
@@ -70,10 +140,13 @@
       width: 70px; height: 70px; object-fit: cover; border-radius: 8px;
       border: 1px solid #444;
     }
+    .watch-links {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+    }
     .watch-link {
       display: inline-block; background: #e50914; color: white;
-      padding: 8px 20px; border-radius: 20px; text-decoration: none;
-      font-weight: 600; margin-top: 8px; transition: 0.3s;
+      padding: 8px 16px; border-radius: 20px; text-decoration: none;
+      font-weight: 600; font-size: 14px; transition: 0.3s;
     }
     .watch-link:hover { background: #b00610; }
 
@@ -125,11 +198,67 @@
     .export-import { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
     .btn-export { background: #2c7; }
     .btn-import { background: #37c; }
+
+    .watch-link-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .watch-link-row input {
+      flex: 1;
+    }
+    .remove-watch-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .remove-watch-btn:hover {
+      background: #bb2d3b;
+    }
+    .add-watch-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .add-watch-btn:hover {
+      background: #218838;
+    }
   </style>
 </head>
 <body>
   <nav>
     <h1>🎬 MovieHub</h1>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search movies by name...">
+    </div>
+    <div class="social-request">
+      <span class="request-label">For any movie comment</span>
+      <div class="social-icons">
+        <!-- Replace the href with your actual Facebook page URL -->
+        <a href="https://www.facebook.com/" target="_blank" title="Request movie on Facebook" class="social-link fb" aria-label="Facebook">
+          <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <!-- Replace the href with your actual Instagram profile URL -->
+        <a href="https://www.instagram.com/" target="_blank" title="Request movie on Instagram" class="social-link ig" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+        <!-- Replace the href with your actual Telegram channel/group link -->
+        <a href="https://t.me/" target="_blank" title="Request movie on Telegram" class="social-link tg" aria-label="Telegram">
+          <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </a>
+      </div>
+    </div>
     <div class="nav-buttons">
       <button id="showMoviesBtn" class="btn-movies">All Movies</button>
       <button id="loginBtn" class="btn-login">Admin Login</button>
@@ -141,7 +270,7 @@
   <div class="container">
     <div id="movieGrid" class="movie-grid"></div>
     <p id="noMovies" style="display:none; text-align:center; margin-top:60px; color:#aaa;">
-      No movies found for this category.
+      No movies found.
     </p>
   </div>
 
@@ -166,7 +295,14 @@
       <div class="form-group"><label>Poster Image</label><input type="file" id="moviePoster" accept="image/*"></div>
       <div class="form-group"><label>Thumbnail URL</label><input type="url" id="thumbnailUrl" placeholder="https://..."></div>
       <div class="form-group"><label>Screenshot URL</label><input type="url" id="screenshotUrl" placeholder="https://..."></div>
-      <div class="form-group"><label>Watching Link *</label><input type="url" id="watchLink" placeholder="https://..."></div>
+      <div class="form-group">
+        <label>Watch Links *</label>
+        <div id="watchLinksContainer">
+          <!-- dynamic watch link rows will be added here -->
+        </div>
+        <button id="addWatchLinkBtn" class="add-watch-btn" type="button">+ Add Another Link</button>
+        <p class="note">Add at least one watch link.</p>
+      </div>
       <div class="form-group">
         <label>Categories *</label>
         <div class="checkbox-group" id="categoryCheckboxes"></div>
@@ -200,7 +336,14 @@
       </div>
       <div class="form-group"><label>Thumbnail URL</label><input type="url" id="editThumbnailUrl"></div>
       <div class="form-group"><label>Screenshot URL</label><input type="url" id="editScreenshotUrl"></div>
-      <div class="form-group"><label>Watching Link *</label><input type="url" id="editWatchLink"></div>
+      <div class="form-group">
+        <label>Watch Links *</label>
+        <div id="editWatchLinksContainer">
+          <!-- dynamic watch link rows will be added here -->
+        </div>
+        <button id="editAddWatchLinkBtn" class="add-watch-btn" type="button">+ Add Another Link</button>
+        <p class="note">Add at least one watch link.</p>
+      </div>
       <div class="form-group">
         <label>Categories *</label>
         <div class="checkbox-group" id="editCategoryCheckboxes"></div>
@@ -214,7 +357,6 @@
   <script>
     (async () => {
       // ============== SUPABASE CONFIG ==============
-      // 👇 Apni project ki values yahan daalein
       const SUPABASE_URL = 'https://uvcvrjuvqgkvtitrpqjp.supabase.co';
       const SUPABASE_ANON_KEY = 'sb_publishable_2eG8zK6oP5xQhm4aR122Ww_JEN3h8Fh';
 
@@ -225,12 +367,13 @@
       const CATEGORIES = [
         "Comedy", "Korean", "Hollywood", "Romantic", "Documentary",
         "Hotstar", "Action", "South", "Bhojpuri", "Korean Drama",
-        "Bollywood", "Anime", "Web Series", "Horror"
+        "Bollywood", "Anime", "Web Series", "Horror" 
       ];
-      const ADMIN_CRED = { user: 'admin', pass: 'admin123' };
+      const ADMIN_CRED = { user: 'SACHIN', pass: 'SACHIN@12RB' };
       let adminLoggedIn = false;
       let currentFilter = 'All';
-      let allMovies = []; // local cache
+      let searchQuery = '';
+      let allMovies = [];
 
       // ============== DOM REFS ==============
       const loginBtn = document.getElementById('loginBtn');
@@ -240,6 +383,73 @@
       const movieGrid = document.getElementById('movieGrid');
       const noMovies = document.getElementById('noMovies');
       const categoryFilter = document.getElementById('categoryFilter');
+      const searchInput = document.getElementById('searchInput');
+      const watchLinksContainer = document.getElementById('watchLinksContainer');
+      const editWatchLinksContainer = document.getElementById('editWatchLinksContainer');
+
+      // ============== WATCH LINKS HELPERS ==============
+      const parseWatchLinks = (watchLinkString) => {
+        if (!watchLinkString) return [];
+        try {
+          const parsed = JSON.parse(watchLinkString);
+          return Array.isArray(parsed) ? parsed : [watchLinkString];
+        } catch {
+          return [watchLinkString];
+        }
+      };
+
+      const serializeWatchLinks = (linksArray) => JSON.stringify(linksArray);
+
+      // Create a new watch link row
+      const createWatchLinkRow = (value = '') => {
+        const row = document.createElement('div');
+        row.className = 'watch-link-row';
+        const input = document.createElement('input');
+        input.type = 'url';
+        input.placeholder = 'https://...';
+        input.value = value;
+        input.required = true;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-watch-btn';
+        removeBtn.textContent = '✕';
+        removeBtn.addEventListener('click', () => {
+          row.remove();
+          // Ensure at least one row remains in upload/edit containers
+          if (watchLinksContainer && watchLinksContainer.children.length === 0) {
+            addWatchLinkRow(watchLinksContainer);
+          }
+          if (editWatchLinksContainer && editWatchLinksContainer.children.length === 0) {
+            addWatchLinkRow(editWatchLinksContainer);
+          }
+        });
+        row.appendChild(input);
+        row.appendChild(removeBtn);
+        return row;
+      };
+
+      const addWatchLinkRow = (container, value = '') => {
+        if (!container) return;
+        container.appendChild(createWatchLinkRow(value));
+      };
+
+      // Get all watch link values from a container
+      const getWatchLinksFromContainer = (container) => {
+        if (!container) return [];
+        const inputs = container.querySelectorAll('input');
+        return Array.from(inputs).map(inp => inp.value.trim()).filter(v => v !== '');
+      };
+
+      // Populate watch links container with array
+      const populateWatchLinksContainer = (container, linksArray) => {
+        if (!container) return;
+        container.innerHTML = '';
+        if (linksArray.length === 0) {
+          addWatchLinkRow(container);
+        } else {
+          linksArray.forEach(link => addWatchLinkRow(container, link));
+        }
+      };
 
       // ============== HELPER FUNCTIONS ==============
       const getMovies = async () => {
@@ -248,10 +458,10 @@
           .select('*')
           .order('created_at', { ascending: false });
         if (error) throw error;
-        // Parse categories if stored as jsonb (Supabase returns it as JSON)
         return data.map(m => ({
           ...m,
-          categories: Array.isArray(m.categories) ? m.categories : JSON.parse(m.categories || '[]')
+          categories: Array.isArray(m.categories) ? m.categories : JSON.parse(m.categories || '[]'),
+          watch_links: parseWatchLinks(m.watch_link)
         }));
       };
 
@@ -264,7 +474,7 @@
             poster_url: movie.posterUrl,
             thumbnail_url: movie.thumbnailUrl,
             screenshot_url: movie.screenshotUrl,
-            watch_link: movie.watchLink,
+            watch_link: serializeWatchLinks(movie.watchLinks),
             categories: movie.categories || []
           }])
           .select();
@@ -279,7 +489,7 @@
         if (updates.posterUrl !== undefined) payload.poster_url = updates.posterUrl;
         if (updates.thumbnailUrl !== undefined) payload.thumbnail_url = updates.thumbnailUrl;
         if (updates.screenshotUrl !== undefined) payload.screenshot_url = updates.screenshotUrl;
-        if (updates.watchLink !== undefined) payload.watch_link = updates.watchLink;
+        if (updates.watchLinks !== undefined) payload.watch_link = serializeWatchLinks(updates.watchLinks);
         if (updates.categories !== undefined) payload.categories = updates.categories;
 
         const { error } = await supabaseClient
@@ -346,15 +556,21 @@
         document.getElementById('moviePoster').value = '';
         document.getElementById('thumbnailUrl').value = '';
         document.getElementById('screenshotUrl').value = '';
-        document.getElementById('watchLink').value = '';
         document.getElementById('uploadMessage').style.display = 'none';
         buildCheckboxes('categoryCheckboxes');
+        populateWatchLinksContainer(watchLinksContainer, ['']);
       };
 
       const renderMovies = () => {
-        const filtered = currentFilter === 'All'
+        let filtered = currentFilter === 'All'
           ? allMovies
           : allMovies.filter(m => m.categories?.includes(currentFilter));
+
+        if (searchQuery.trim() !== '') {
+          const q = searchQuery.trim().toLowerCase();
+          filtered = filtered.filter(m => m.title && m.title.toLowerCase().includes(q));
+        }
+
         movieGrid.innerHTML = '';
         if (filtered.length === 0) {
           noMovies.style.display = 'block';
@@ -369,6 +585,18 @@
           let extra = '';
           if (movie.thumbnail_url) extra += `<div class="extra-images"><img src="${movie.thumbnail_url}" alt="thumb"></div>`;
           if (movie.screenshot_url) extra += `<div class="extra-images"><img src="${movie.screenshot_url}" alt="screenshot"></div>`;
+
+          // Build watch link buttons
+          const links = movie.watch_links || [];
+          let watchBtns = '';
+          if (links.length > 0) {
+            watchBtns = '<div class="watch-links">';
+            links.forEach((link, idx) => {
+              watchBtns += `<a href="${link}" target="_blank" class="watch-link">▶ Watch ${links.length > 1 ? (idx+1) : 'Now'}</a>`;
+            });
+            watchBtns += '</div>';
+          }
+
           const adminBtns = adminLoggedIn ? `
             <div class="admin-actions">
               <button class="btn-edit" data-id="${movie.id}">✏️ Edit</button>
@@ -382,7 +610,7 @@
               <p>${movie.description || 'No description.'}</p>
               <div class="categories">${catTags}</div>
               ${extra}
-              ${movie.watch_link ? `<a href="${movie.watch_link}" target="_blank" class="watch-link">▶ Watch Now</a>` : ''}
+              ${watchBtns}
               ${adminBtns}
             </div>`;
           if (adminLoggedIn) {
@@ -397,7 +625,6 @@
         });
       };
 
-      // Refresh all movies from DB and re-render
       const loadMovies = async () => {
         try {
           allMovies = await getMovies();
@@ -415,12 +642,14 @@
         document.getElementById('editMovieDesc').value = movie.description || '';
         document.getElementById('editThumbnailUrl').value = movie.thumbnail_url || '';
         document.getElementById('editScreenshotUrl').value = movie.screenshot_url || '';
-        document.getElementById('editWatchLink').value = movie.watch_link || '';
         document.getElementById('editPosterPreview').innerHTML = movie.poster_url
           ? `<img src="${movie.poster_url}" style="max-width:150px;max-height:150px;"><p class="note">Current poster</p>`
           : '<p class="note">No poster</p>';
         document.getElementById('editMoviePoster').value = '';
         buildCheckboxes('editCategoryCheckboxes', movie.categories || []);
+        // Populate watch links
+        const links = movie.watch_links || [];
+        populateWatchLinksContainer(editWatchLinksContainer, links.length ? links : ['']);
         document.getElementById('editMessage').style.display = 'none';
         editPanel.classList.add('active');
       };
@@ -431,13 +660,13 @@
         const desc = document.getElementById('editMovieDesc').value.trim();
         const thumb = document.getElementById('editThumbnailUrl').value.trim();
         const screen = document.getElementById('editScreenshotUrl').value.trim();
-        const watch = document.getElementById('editWatchLink').value.trim();
         const file = document.getElementById('editMoviePoster').files[0];
         const cats = Array.from(document.querySelectorAll('#editCategoryCheckboxes input:checked')).map(cb => cb.value);
+        const watchLinks = getWatchLinksFromContainer(editWatchLinksContainer);
         const msg = document.getElementById('editMessage');
 
         if (!title) { msg.textContent = 'Title required.'; msg.style.display='block'; return; }
-        if (!watch) { msg.textContent = 'Watch link required.'; msg.style.display='block'; return; }
+        if (watchLinks.length === 0) { msg.textContent = 'At least one watch link required.'; msg.style.display='block'; return; }
         if (cats.length === 0) { msg.textContent = 'Select at least one category.'; msg.style.display='block'; return; }
 
         const applyUpdate = async (posterBase64 = null) => {
@@ -447,16 +676,14 @@
               description: desc,
               thumbnailUrl: thumb,
               screenshotUrl: screen,
-              watchLink: watch,
+              watchLinks: watchLinks,
               categories: cats
             };
-            // Only set posterUrl if new file uploaded, else keep current
             if (file && posterBase64) {
               updateData.posterUrl = posterBase64;
             }
             await updateMovieInDB(id, updateData);
             editPanel.classList.remove('active');
-            // Realtime subscription will automatically reload the list
           } catch (err) {
             msg.textContent = 'Update failed: ' + err.message;
             msg.style.display = 'block';
@@ -476,19 +703,24 @@
         editPanel.classList.remove('active');
       });
 
+      // Add watch link in edit panel
+      document.getElementById('editAddWatchLinkBtn').addEventListener('click', () => {
+        addWatchLinkRow(editWatchLinksContainer);
+      });
+
       // ============== UPLOAD ==============
       document.getElementById('uploadMovieBtn').addEventListener('click', async () => {
         const title = document.getElementById('movieTitle').value.trim();
         const desc = document.getElementById('movieDesc').value.trim();
         const thumb = document.getElementById('thumbnailUrl').value.trim();
         const screen = document.getElementById('screenshotUrl').value.trim();
-        const watch = document.getElementById('watchLink').value.trim();
         const file = document.getElementById('moviePoster').files[0];
         const cats = Array.from(document.querySelectorAll('#categoryCheckboxes input:checked')).map(cb => cb.value);
+        const watchLinks = getWatchLinksFromContainer(watchLinksContainer);
         const msg = document.getElementById('uploadMessage');
 
         if (!title) { msg.textContent = 'Title required.'; msg.style.display='block'; return; }
-        if (!watch) { msg.textContent = 'Watch link required.'; msg.style.display='block'; return; }
+        if (watchLinks.length === 0) { msg.textContent = 'At least one watch link required.'; msg.style.display='block'; return; }
         if (cats.length === 0) { msg.textContent = 'Select at least one category.'; msg.style.display='block'; return; }
 
         const save = async (posterBase64) => {
@@ -499,14 +731,13 @@
               posterUrl: posterBase64 || '',
               thumbnailUrl: thumb,
               screenshotUrl: screen,
-              watchLink: watch,
+              watchLinks: watchLinks,
               categories: cats
             });
             msg.textContent = '✅ Movie uploaded!';
             msg.style.color = '#4caf50';
             msg.style.display = 'block';
             clearUploadForm();
-            // Realtime will handle UI refresh
           } catch (err) {
             msg.textContent = 'Upload failed: ' + err.message;
             msg.style.display = 'block';
@@ -520,6 +751,11 @@
         } else {
           save('');
         }
+      });
+
+      // Add watch link in upload panel
+      document.getElementById('addWatchLinkBtn').addEventListener('click', () => {
+        addWatchLinkRow(watchLinksContainer);
       });
 
       // ============== EXPORT / IMPORT ==============
@@ -546,13 +782,17 @@
             if (!Array.isArray(imported)) throw new Error('Invalid format');
             for (const movie of imported) {
               const { id, created_at, ...rest } = movie;
+              // watch_link string might be present; keep as is if valid JSON array string
+              let watchLinkValue = rest.watch_link;
+              // if the backup was from this new version, it's already stored as JSON array string
+              // No conversion needed, just insert
               await supabaseClient.from('movies').insert([{
                 title: rest.title,
                 description: rest.description,
                 poster_url: rest.poster_url,
                 thumbnail_url: rest.thumbnail_url,
                 screenshot_url: rest.screenshot_url,
-                watch_link: rest.watch_link,
+                watch_link: watchLinkValue,
                 categories: rest.categories || []
               }]);
             }
@@ -591,6 +831,7 @@
           loginOverlay.classList.remove('active');
           adminPanel.classList.add('active');
           buildCheckboxes('categoryCheckboxes');
+          populateWatchLinksContainer(watchLinksContainer, ['']);
           renderMovies();
         } else {
           document.getElementById('loginError').textContent = 'Invalid credentials';
@@ -612,7 +853,6 @@
         clearUploadForm();
       });
 
-      // Close overlays on outside click
       window.addEventListener('click', e => {
         if (e.target === loginOverlay) loginOverlay.classList.remove('active');
         if (e.target === adminPanel) adminPanel.classList.remove('active');
@@ -621,8 +861,15 @@
 
       document.getElementById('showMoviesBtn').addEventListener('click', () => {
         currentFilter = 'All';
+        searchQuery = '';
+        searchInput.value = '';
         renderMovies();
         buildCategoryFilters();
+      });
+
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderMovies();
       });
 
       // ============== REALTIME SUBSCRIPTION ==============
@@ -630,25 +877,25 @@
         .channel('movies-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'movies' }, payload => {
           console.log('Realtime change received:', payload.eventType);
-          loadMovies(); // Refresh the list
+          loadMovies();
         })
         .subscribe();
 
       // ============== INITIAL SETUP ==============
-      // Restore admin session from localStorage (simple check)
       adminLoggedIn = localStorage.getItem('moviehub_admin') === '1';
       updateLoginButton();
       buildCategoryFilters();
       buildCheckboxes('categoryCheckboxes');
       buildCheckboxes('editCategoryCheckboxes');
+      // Initialize watch link containers with one empty row
+      populateWatchLinksContainer(watchLinksContainer, ['']);
+      populateWatchLinksContainer(editWatchLinksContainer, ['']);
       try {
         await loadMovies();
       } catch (err) {
         console.error('Initial load failed:', err);
-        // If error due to RLS, still show empty grid
       }
 
-      // Save admin state
       window.addEventListener('beforeunload', () => {
         localStorage.setItem('moviehub_admin', adminLoggedIn ? '1' : '0');
       });
